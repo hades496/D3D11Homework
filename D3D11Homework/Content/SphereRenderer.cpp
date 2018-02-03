@@ -167,8 +167,8 @@ void SphereRenderer::Render()
 		0
 	);
 
-	// 每个顶点都是 VertexPositionColor 结构的一个实例。
-	UINT stride = sizeof(VertexPositionColor);
+	// 每个顶点都是 VertexPCNT 结构的一个实例。
+	UINT stride = sizeof(VertexPCNT);
 	UINT offset = 0;
 	context->IASetVertexBuffers(
 		0,
@@ -279,7 +279,7 @@ void SphereRenderer::CreateDeviceDependentResources()
 
 		// 加载网格顶点。每个顶点都有一个位置和一个颜色。
 		
-		static const VertexPositionColor SphereVertices[] =
+		static const VertexPCNT SphereVertices[] =
 		{
 			{ XMFLOAT3(0.000000f, -1.000000f, 0.000000f), XMFLOAT3(1.000000f, 1.000000f, 1.000000f) },
 

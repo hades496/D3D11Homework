@@ -10,10 +10,12 @@ namespace D3D11Homework
 		DirectX::XMFLOAT4X4 projection;
 	};
 
-	// 用于向顶点着色器发送每个顶点的数据。
-	struct VertexPositionColor
+	// 用于向顶点着色器发送每个顶点的数据Position,Color,Normal,Texure。
+	struct VertexPCNT
 	{
 		DirectX::XMFLOAT3 pos;
 		DirectX::XMFLOAT3 color;
+		DirectX::XMFLOAT3 normal;
+		DirectX::XMFLOAT2 texure;
 	};
 }

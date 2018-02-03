@@ -93,16 +93,14 @@ void CubeBox::Update(DX::StepTimer const& timer)
 
 		// 初始化变换矩阵
 		cumulativeMatrix *= XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
-		cumulativeMatrix *= XMMatrixTranslation(m_transform.x, m_transform.y, m_transform.z);
+		
 
 		// 具体的变换
-		float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
-		double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
-
-		float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 		if (m_rotatable)
 		{
-			
+			float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
+			double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
+			float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 			cumulativeMatrix *= XMMatrixRotationY(radians);
 		}
 			
@@ -168,8 +166,8 @@ void CubeBox::Render()
 		0
 	);
 
-	// 每个顶点都是 VertexPositionColor 结构的一个实例。
-	UINT stride = sizeof(VertexPositionColor);
+	// 每个顶点都是 VertexPCNT 结构的一个实例。
+	UINT stride = sizeof(VertexPCNT);
 	UINT offset = 0;
 	context->IASetVertexBuffers(
 		0,
@@ -241,7 +239,6 @@ void CubeBox::CreateDeviceDependentResources()
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-
 		};
 
 		DX::ThrowIfFailed(
@@ -280,7 +277,7 @@ void CubeBox::CreateDeviceDependentResources()
 	auto createCubeTask = (createPSTask && createVSTask).then([this]() {
 
 		// 加载网格顶点。每个顶点都有一个位置和一个颜色。
-		static const VertexPositionColor cubeVertices[] =
+		static const VertexPCNT cubeVertices[] =
 		{
 			{ XMFLOAT3(1.0f, -0.5f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) },
 			{ XMFLOAT3(1.0f, -0.5f, 2.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },

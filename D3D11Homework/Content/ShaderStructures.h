@@ -16,6 +16,6 @@ namespace D3D11Homework
 		DirectX::XMFLOAT3 pos;
 		DirectX::XMFLOAT3 color;
 		DirectX::XMFLOAT3 normal;
-		DirectX::XMFLOAT2 texure;
+		DirectX::XMFLOAT2 texture;
 	};
 }

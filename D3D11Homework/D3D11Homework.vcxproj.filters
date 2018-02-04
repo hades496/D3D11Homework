@@ -56,6 +56,9 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
       <Filter>资产</Filter>
     </Image>
+    <Filter Include="FX">
+      <UniqueIdentifier>{e6440b5c-56a5-4529-997d-c57153a9cd2d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
@@ -107,5 +110,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="D3D11Homework_TemporaryKey.pfx" />
+    <None Include="FX\Lighting.fx">
+      <Filter>FX</Filter>
+    </None>
   </ItemGroup>
 </Project>

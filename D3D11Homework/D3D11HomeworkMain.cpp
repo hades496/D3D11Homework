@@ -97,6 +97,8 @@ bool D3D11HomeworkMain::Render()
 	// 呈现场景对象。
 	m_fpsTextRenderer->Render();
 	m_sceneRenderer->Render();
+
+	
 	return true;
 }
 

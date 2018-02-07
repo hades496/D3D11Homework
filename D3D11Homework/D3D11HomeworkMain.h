@@ -6,6 +6,7 @@
 #include "Content\SampleFpsTextRenderer.h"
 #include "Content\Snowman.h"
 #include "Content\SceneRenderer.h"
+#include "Common\LightHelper.h"
 
 // 在屏幕上呈现 Direct2D 和 3D 内容。
 namespace D3D11Homework
@@ -32,6 +33,12 @@ namespace D3D11Homework
 		std::unique_ptr<SceneRenderer> m_sceneRenderer;
 		std::unique_ptr<SampleFpsTextRenderer> m_fpsTextRenderer;
 
+		DirectionalLight m_dirLight;
+		PointLight m_pointLight;
+		SpotLight m_spotLight;
+		Material m_cubeboxMat;
+		Material m_sphereMat;
+		
 		// 渲染循环计时器。
 		DX::StepTimer m_timer;
 	};

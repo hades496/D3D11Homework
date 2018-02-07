@@ -1,8 +1,9 @@
 #include "pch.h"
 #include "CubeBox.h"
 
-#include "..\Common\DirectXHelper.h"
-
+#include "Common\DirectXHelper.h"
+#include "Content\DDSTextureLoader.h"
+#include "WinUser.h"
 
 
 using namespace D3D11Homework;
@@ -93,9 +94,8 @@ void CubeBox::Update(DX::StepTimer const& timer)
 
 		// 初始化变换矩阵
 		cumulativeMatrix *= XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
-		
-
-		// 具体的变换
+		cumulativeMatrix *= XMMatrixTranslation(m_transform.x, m_transform.y, m_transform.z);
+		// 具体的模型变换
 		if (m_rotatable)
 		{
 			float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
@@ -103,24 +103,24 @@ void CubeBox::Update(DX::StepTimer const& timer)
 			float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
 			cumulativeMatrix *= XMMatrixRotationY(radians);
 		}
-			
 
-		// 更新模型	
-		ModelUpdate(cumulativeMatrix);
+		// 设置灯光参数
+		XMFLOAT4 vLightDirs = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		XMFLOAT4 vLightColors = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+		// 准备将更新的模型矩阵传递到着色器
+		XMStoreFloat4x4(
+			&m_constantBufferData.model,
+			XMMatrixTranspose(
+				cumulativeMatrix
+			)
+		);
+		m_constantBufferData.vLightColor = vLightColors;
+		m_constantBufferData.vLightDir = vLightDirs;
+
 	}
 }
 
-// 用合变换矩阵更新模型
-void CubeBox::ModelUpdate(CXMMATRIX cumulativeMatrix)
-{
-	// 准备将更新的模型矩阵传递到着色器
-	XMStoreFloat4x4(
-		&m_constantBufferData.model,
-		XMMatrixTranspose(
-			cumulativeMatrix
-		)
-	);
-}
 
 
 void CubeBox::StartTracking()
@@ -135,7 +135,12 @@ void CubeBox::TrackingUpdate(float positionX)
 	{
 		float radians = XM_2PI * 2.0f * positionX / m_deviceResources->GetOutputSize().Width;
 		XMMATRIX rotation_Matrix = XMMatrixRotationY(radians);
-		ModelUpdate(rotation_Matrix);
+		XMStoreFloat4x4(
+			&m_constantBufferData.model,
+			XMMatrixTranspose(
+				rotation_Matrix
+			)
+		);
 	}
 }
 
@@ -188,41 +193,25 @@ void CubeBox::Render()
 	context->IASetInputLayout(m_inputLayout.Get());
 
 	// 附加我们的顶点着色器。
-	context->VSSetShader(
-		m_vertexShader.Get(),
-		nullptr,
-		0
-	);
+	context->VSSetShader( m_vertexShader.Get(), nullptr, 0);
 
 	// 将常量缓冲区发送到图形设备。
-	context->VSSetConstantBuffers1(
-		0,
-		1,
-		m_constantBuffer.GetAddressOf(),
-		nullptr,
-		nullptr
-	);
+	context->VSSetConstantBuffers1( 0, 1, m_constantBuffer.GetAddressOf(), nullptr, nullptr);
 
 	// 附加我们的像素着色器。
-	context->PSSetShader(
-		m_pixelShader.Get(),
-		nullptr,
-		0
-	);
-
+	context->PSSetShader( m_pixelShader.Get(), nullptr, 0);
+	context->PSSetShaderResources(0, 1, m_textureRV.GetAddressOf());
+	context->PSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
+	context->PSSetSamplers(0, 1, m_samplerLinear.GetAddressOf());
 	// 绘制对象。
-	context->DrawIndexed(
-		m_indexCount,
-		0,
-		0
-	);
+	context->DrawIndexed( m_indexCount, 0, 0);
 }
 
 void CubeBox::CreateDeviceDependentResources()
 {
 	// 通过异步方式加载着色器。
-	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
-	auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
+	auto loadVSTask = DX::ReadDataAsync(L"VertexShader.cso");
+	auto loadPSTask = DX::ReadDataAsync(L"PixelShader.cso");
 
 	// 加载顶点着色器文件之后，创建着色器和输入布局。
 	auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData) {
@@ -238,7 +227,8 @@ void CubeBox::CreateDeviceDependentResources()
 		static const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DX::ThrowIfFailed(
@@ -271,22 +261,60 @@ void CubeBox::CreateDeviceDependentResources()
 				&m_constantBuffer
 			)
 		);
+		
+		D3D11_SAMPLER_DESC sampDesc;
+		ZeroMemory(&sampDesc, sizeof(sampDesc));
+		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+		sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		sampDesc.MinLOD = 0;
+		sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		DX::ThrowIfFailed(
+			m_deviceResources->GetD3DDevice()->CreateSamplerState(
+				&sampDesc,
+				&m_samplerLinear
+			)
+		);
+
 	});
 
 	// 加载两个着色器后，创建网格。
 	auto createCubeTask = (createPSTask && createVSTask).then([this]() {
 
-		// 加载网格顶点。每个顶点都有一个位置和一个颜色。
+		// 加载网格顶点。每个顶点都有一个位置,法向量，纹理坐标。
 		static const VertexPCNT cubeVertices[] =
 		{
-			{ XMFLOAT3(1.0f, -0.5f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f) },
-			{ XMFLOAT3(1.0f, -0.5f, 2.0f), XMFLOAT3(0.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(1.0f,  0.5f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f) },
-			{ XMFLOAT3(1.0f,  0.5f, 2.0f), XMFLOAT3(0.0f, 1.0f, 1.0f) },
-			{ XMFLOAT3(2.0f, -0.5f, 1.0f), XMFLOAT3(1.0f, 0.0f, 0.0f) },
-			{ XMFLOAT3(2.0f, -0.5f, 2.0f), XMFLOAT3(1.0f, 0.0f, 1.0f) },
-			{ XMFLOAT3(2.0f,  0.5f, 1.0f), XMFLOAT3(1.0f, 1.0f, 0.0f) },
-			{ XMFLOAT3(2.0f,  0.5f, 2.0f), XMFLOAT3(1.0f, 1.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+
+			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(0.0f, -1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+
+			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT3(-1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+
+			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+
+			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT3(0.0f, 0.0f, -1.0f), XMFLOAT2(0.0f, 0.0f) },
+
+			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(0.0f, 0.0f) },
+			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT3(0.0f, 0.0f, 1.0f), XMFLOAT2(1.0f, 0.0f) },
 		};
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
@@ -309,23 +337,23 @@ void CubeBox::CreateDeviceDependentResources()
 		// 此网格的第一个三角形。
 		static const unsigned short cubeIndices[] =
 		{
-			0,2,1, // -x
-			1,2,3,
+			0,1,3,
+			3,1,2,
 
-			4,5,6, // +x
-			5,7,6,
+			5,4,6,
+			6,4,7,
 
-			0,1,5, // -y
-			0,5,4,
+			8,9,11,
+			11,9,10,
 
-			2,6,7, // +y
-			2,7,3,
+			13,12,14,
+			14,12,15,
 
-			0,4,6, // -z
-			0,6,2,
+			16,17,19,
+			19,17,18,
 
-			1,3,7, // +z
-			1,7,5,
+			21,20,22,
+			22,20,23
 		};
 
 		m_indexCount = ARRAYSIZE(cubeIndices);
@@ -340,6 +368,16 @@ void CubeBox::CreateDeviceDependentResources()
 				&indexBufferDesc,
 				&indexBufferData,
 				&m_indexBuffer
+			)
+		);
+		
+		// 加载纹理
+		DX::ThrowIfFailed(
+			CreateDDSTextureFromFile(
+				m_deviceResources->GetD3DDevice(),
+				L"Assets/sonw.dds",
+				nullptr,
+				&m_textureRV
 			)
 		);
 	});

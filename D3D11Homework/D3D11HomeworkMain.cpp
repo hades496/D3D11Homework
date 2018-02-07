@@ -9,8 +9,6 @@ using namespace Concurrency;
 using namespace DirectX;
 using namespace std;
 
-
-
 // 加载应用程序时加载并初始化应用程序资产。
 D3D11HomeworkMain::D3D11HomeworkMain(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_deviceResources(deviceResources)
@@ -18,18 +16,16 @@ D3D11HomeworkMain::D3D11HomeworkMain(const std::shared_ptr<DX::DeviceResources>&
 	// 注册以在设备丢失或重新创建时收到通知
 	m_deviceResources->RegisterDeviceNotify(this);
 
-	// TODO: 将此替换为应用程序内容的初始化。
+	// 创建模型
 	m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 
 	m_sceneRenderer = std::unique_ptr<SceneRenderer>(new SceneRenderer(m_deviceResources));
 
 	m_sceneRenderer->Add(std::unique_ptr<Model>(new CubeBox(m_deviceResources, true, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
-	m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(1.5f, 1.0f, 1.5f))));
-	m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.6f, 0.6f, 0.6f), XMFLOAT3(-1.5f, 0.0f, 1.5f))));
-	m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.7f, 0.7f, 0.7f), XMFLOAT3(1.5f, 0.0f, -1.5f))));
-	m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.8f, 0.8f, 0.8f), XMFLOAT3(-1.5f, 0.0f, -1.5f))));
-	m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, false, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
-	
+	//m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(1.5f, 1.0f, 1.5f))));
+	//m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, false, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
+
+
 
 	// TODO: 如果需要默认的可变时间步长模式之外的其他模式，请更改计时器设置。
 	// 例如，对于 60 FPS 固定时间步长更新逻辑，请调用:
@@ -59,6 +55,11 @@ void D3D11HomeworkMain::Start()
 // 每帧更新一次应用程序状态。
 void D3D11HomeworkMain::Update() 
 {
+	//mfxDirLight->SetRawValue(&mDirLight, 0, sizeof(mDirLight));
+	//mfxPointLight->SetRawValue(&mPointLight, 0, sizeof(mPointLight));
+	//mfxSpotLight->SetRawValue(&mSpotLight, 0, sizeof(mSpotLight));
+	//mfxEyePosW->SetRawValue(&mEyePosW, 0, sizeof(mEyePosW));
+
 	// 更新场景对象。
 	m_timer.Tick([&]()
 	{
@@ -95,7 +96,7 @@ bool D3D11HomeworkMain::Render()
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
 	// 呈现场景对象。
-	m_fpsTextRenderer->Render();
+	//m_fpsTextRenderer->Render();
 	m_sceneRenderer->Render();
 
 	

@@ -4,6 +4,7 @@
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
 #include "..\Common\DirectXHelper.h"
+#include "..\Common\LightHelper.h"
 
 namespace D3D11Homework
 {

@@ -1,185 +1,69 @@
-/* 
-**********               Lighting.fx		  **********
-********** 包括三种光源结构体的定义和计算函数 **********
-*/
+//=============================================================================
+// Lighting.fx by Frank Luna (C) 2011 All Rights Reserved.
+//
+// Transforms and lights geometry.
+//=============================================================================
 
-// 点光源
-struct PointLight
+#include "LightHelper.fx"
+
+VertexOut VS(VertexIn vin)
 {
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
+	VertexOut vout;
 
-	float3 Position;
-	float Range;
+	// 转换到世界空间
+	vout.PosW = mul(float4(vin.PosL, 1.0f), gWorld).xyz;
+	vout.NormalW = mul(vin.NormalL, (float3x3)gWorldInvTranspose);
 
-	float3 Att;
-	float pad;
-};
+	// 转换到齐次剪裁空间
+	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);
 
-// 聚光灯光源
-struct SpotLight
-{
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
-
-	float3 Position;
-	float Range;
-
-	float3 Direction;
-	float Spot;
-
-	float3 Att;
-	float pad;
-};
-
-
-// 平行光源
-struct DirectionalLight
-{
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;
-	float3 Direction;
-	float pad;
-};
-
-struct Material
-{
-	float4 Ambient;
-	float4 Diffuse;
-	float4 Specular;  //  w分量为高光强度
-	float4 Reflect;
-};
-
-void ComputeDirectionalLight(Material mat, DirectionalLight L, float3 normal, float3 toEye,
-	out float4 ambient,
-	out float4 diffuse,
-	out float4 spec)
-{
-	// 初始化输出的变量
-	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	// 光照矢量与光线的传播方向相反
-	float3 lightVec = -L.Direction;
-
-	// 添加环境光
-	ambient = mat.Ambient * L.Ambient;
-
-	// 添加漫反射和镜面光
-	float diffuseFactor = dot(lightVec, normal);
-
-	// Flatten避免动态分支
-	[flatten]
-	// 顶点背向光源不再计算
-	if (diffuseFactor > 0.0f)
-	{
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
-
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFactor * mat.Specular * L.Specular;
-	}
+	return vout;
 }
 
-void ComputePointLight(Material mat, PointLight L, float3 pos, float3 normal, float3 toEye,
-	out float4 ambient, out float4 diffuse, out float4 spec)
+float4 PS(VertexOut pin) : SV_Target
 {
-	// 初始化输出变量
-	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	// 插值后的法线需要重新规范化
+	pin.NormalW = normalize(pin.NormalW);
 
-	// 表面指向光源的矢量
-	float3 lightVec = L.Position - pos;
+	float3 toEyeW = normalize(gEyePosW - pin.PosW);
 
-	// 表面离光源的距离
-	float d = length(lightVec);
+	// 初始化光照变量 
+	float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	float4 spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Range test.
-	if (d > L.Range)
-		return;
+	// 每个光源的贡献
+	float4 A, D, S;
 
-	// Normalize the light vector.
-	lightVec /= d;
+	ComputeDirectionalLight(gMaterial, gDirLight, pin.NormalW, toEyeW, A, D, S);
+	ambient += A;
+	diffuse += D;
+	spec += S;
 
-	// Ambient term.
-	ambient = mat.Ambient * L.Ambient;
+	ComputePointLight(gMaterial, gPointLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
+	ambient += A;
+	diffuse += D;
+	spec += S;
 
-	// Add diffuse and specular term, provided the surface is in 
-	// the line of site of the light.
+	ComputeSpotLight(gMaterial, gSpotLight, pin.PosW, pin.NormalW, toEyeW, A, D, S);
+	ambient += A;
+	diffuse += D;
+	spec += S;
 
-	float diffuseFactor = dot(lightVec, normal);
+	float4 litColor = ambient + diffuse + spec;
 
-	// Flatten to avoid dynamic branching.
-	[flatten]
-	if (diffuseFactor > 0.0f)
-	{
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
+	// 通常从漫反射材质中提取alpha
+	litColor.a = gMaterial.Diffuse.a;
 
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFactor * mat.Specular * L.Specular;
-	}
-
-	// 衰减
-	float att = 1.0f / dot(L.Att, float3(1.0f, d, d*d));
-
-	diffuse *= att;
-	spec *= att;
+	return litColor;
 }
 
-
-void ComputeSpotLight(Material mat, SpotLight L, float3 pos, float3 normal, float3 toEye,
-	out float4 ambient, out float4 diffuse, out float4 spec)
+technique11 LightTech
 {
-	// 初始化输出变量.
-	ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-	// 从表面指向光源的光照矢量
-	float3 lightVec = L.Position - pos;
-
-	// 表面离开光源的距离
-	float d = length(lightVec);
-
-	// Range test.
-	if (d > L.Range)
-		return;
-
-	// 规范化光照矢量
-	lightVec /= d;
-
-	// 计算环境光
-	ambient = mat.Ambient * L.Ambient;
-
-	// 计算漫反射和镜面光，provided the surface is in 
-	// the line of site of the light.
-
-	float diffuseFactor = dot(lightVec, normal);
-
-	// Flatten避免动态分支
-	[flatten]
-	if (diffuseFactor > 0.0f)
+	pass P0
 	{
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
-
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFactor * mat.Specular * L.Specular;
+		SetVertexShader(CompileShader(vs_5_0, VS()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PS()));
 	}
-
-	// Scale by spotlight factor and attenuate.
-	float spot = pow(max(dot(-lightVec, L.Direction), 0.0f), L.Spot);
-
-	// Scale by spotlight factor and attenuate.
-	float att = spot / dot(L.Att, float3(1.0f, d, d*d));
-
-	ambient *= spot;
-	diffuse *= att;
-	spec *= att;
 }

@@ -32,12 +32,6 @@
     <ClCompile Include="Content\SampleFpsTextRenderer.cpp">
       <Filter>内容</Filter>
     </ClCompile>
-    <FxCompile Include="Content\SamplePixelShader.hlsl">
-      <Filter>内容</Filter>
-    </FxCompile>
-    <FxCompile Include="Content\SampleVertexShader.hlsl">
-      <Filter>内容</Filter>
-    </FxCompile>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
       <Filter>资产</Filter>
     </Image>
@@ -79,6 +73,9 @@
     <ClCompile Include="Content\SphereRenderer.cpp">
       <Filter>内容</Filter>
     </ClCompile>
+    <ClCompile Include="Content\DDSTextureLoader.cpp">
+      <Filter>内容</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -99,9 +96,18 @@
     <ClInclude Include="Content\SphereRenderer.h">
       <Filter>内容</Filter>
     </ClInclude>
+    <ClInclude Include="Common\LightHelper.h">
+      <Filter>通用</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\DDSTextureLoader.h">
+      <Filter>内容</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\snow.dds">
       <Filter>资产</Filter>
     </Image>
   </ItemGroup>
@@ -110,8 +116,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="D3D11Homework_TemporaryKey.pfx" />
-    <None Include="FX\Lighting.fx">
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="FX\VertexShader.hlsl">
       <Filter>FX</Filter>
-    </None>
+    </FxCompile>
+    <FxCompile Include="FX\PixelShader.hlsl">
+      <Filter>FX</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\3DSnowman.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

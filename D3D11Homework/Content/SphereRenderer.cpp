@@ -222,8 +222,8 @@ void SphereRenderer::Render()
 void SphereRenderer::CreateDeviceDependentResources()
 {
 	// 通过异步方式加载着色器。
-	auto loadVSTask = DX::ReadDataAsync(L"SampleVertexShader.cso");
-	auto loadPSTask = DX::ReadDataAsync(L"SamplePixelShader.cso");
+	auto loadVSTask = DX::ReadDataAsync(L"VertexShader.cso");
+	auto loadPSTask = DX::ReadDataAsync(L"PixelShader.cso");
 
 	// 加载顶点着色器文件之后，创建着色器和输入布局。
 	auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData) {
@@ -239,7 +239,8 @@ void SphereRenderer::CreateDeviceDependentResources()
 		static const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DX::ThrowIfFailed(

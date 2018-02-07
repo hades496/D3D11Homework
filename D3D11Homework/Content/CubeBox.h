@@ -25,7 +25,7 @@ namespace D3D11Homework
 		bool IsTracking() { return m_tracking; }
 
 	private:
-		void ModelUpdate(DirectX::CXMMATRIX cumulativeMatrix);
+		
 
 	private:
 		// 缓存的设备资源指针。
@@ -38,6 +38,8 @@ namespace D3D11Homework
 		Microsoft::WRL::ComPtr<ID3D11VertexShader>	m_vertexShader;
 		Microsoft::WRL::ComPtr<ID3D11PixelShader>	m_pixelShader;
 		Microsoft::WRL::ComPtr<ID3D11Buffer>		m_constantBuffer;
+		Microsoft::WRL::ComPtr<ID3D11SamplerState>	m_samplerLinear;
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureRV;
 
 		// 立体几何的系统资源。
 		ModelViewProjectionConstantBuffer	m_constantBufferData;

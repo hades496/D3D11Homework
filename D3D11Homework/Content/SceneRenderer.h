@@ -3,8 +3,12 @@
 #include "..\Common\DeviceResources.h"
 #include "ShaderStructures.h"
 #include "..\Common\StepTimer.h"
+#include "Content\CubeBox.h"
+#include "Content\Snowman.h"
+#include "Content\Plane.h"
 #include "Model.h"
 #include <vector>
+
 
 namespace D3D11Homework
 {
@@ -21,6 +25,8 @@ namespace D3D11Homework
 		void ReleaseDeviceDependentResources();
 		void CreateDeviceDependentResources();
 		void CreateWindowSizeDependentResources();
+		
+		
 		
 	private:
 		std::vector<std::unique_ptr<Model>> m_modelManager; //模型管理器

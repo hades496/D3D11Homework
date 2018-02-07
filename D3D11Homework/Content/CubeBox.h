@@ -25,9 +25,7 @@ namespace D3D11Homework
 		bool IsTracking() { return m_tracking; }
 
 	private:
-		
 
-	private:
 		// 缓存的设备资源指针。
 		std::shared_ptr<DX::DeviceResources> m_deviceResources;
 
@@ -41,8 +39,6 @@ namespace D3D11Homework
 		Microsoft::WRL::ComPtr<ID3D11SamplerState>	m_samplerLinear;
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_textureRV;
 
-		// 立体几何的系统资源。
-		ModelViewProjectionConstantBuffer	m_constantBufferData;
 		uint32	m_indexCount;
 
 		// 用于渲染循环的变量。
@@ -53,8 +49,6 @@ namespace D3D11Homework
 		// 用于模型初始化的变量。
 		DirectX::XMFLOAT3 m_scale;
 		DirectX::XMFLOAT3 m_transform;
-
-		// 附加参数
 		bool	m_rotatable;	//是否旋转
 		
 

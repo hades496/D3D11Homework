@@ -16,7 +16,6 @@ namespace D3D11Homework
 		Snowman(const std::shared_ptr<DX::DeviceResources>& deviceResources);
 		Snowman(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform);
 		void CreateWindowSizeDependentResources();
-		void Start();
 		void Update(DX::StepTimer const& timer);
 		void Render();
 
@@ -25,7 +24,7 @@ namespace D3D11Homework
 		// IDeviceNotify
 		virtual void ReleaseDeviceDependentResources();
 		virtual void CreateDeviceDependentResources();
-
+		void ChangeViewMatrix(const DirectX::XMVECTORF32 eye, const DirectX::XMVECTORF32 at, const DirectX::XMVECTORF32 up);
 	private:
 		// 附加参数
 		bool	m_rotatable;	//是否旋转

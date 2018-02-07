@@ -76,6 +76,12 @@
     <ClCompile Include="Content\DDSTextureLoader.cpp">
       <Filter>内容</Filter>
     </ClCompile>
+    <ClCompile Include="Content\Plane.cpp">
+      <Filter>内容</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\FirstCamera.cpp">
+      <Filter>内容</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
@@ -102,6 +108,12 @@
     <ClInclude Include="Content\DDSTextureLoader.h">
       <Filter>内容</Filter>
     </ClInclude>
+    <ClInclude Include="Content\Plane.h">
+      <Filter>内容</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\FirstCamera.h">
+      <Filter>内容</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\StoreLogo.png">
@@ -115,6 +127,9 @@
     </Image>
     <Image Include="snow.dds" />
     <Image Include="Assets\Wood.dds">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\Grass.dds">
       <Filter>资产</Filter>
     </Image>
   </ItemGroup>

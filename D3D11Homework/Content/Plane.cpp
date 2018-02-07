@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "CubeBox.h"
+#include "Plane.h"
 
 #include "Common\DirectXHelper.h"
 #include "Content\DDSTextureLoader.h"
@@ -12,18 +12,18 @@ using namespace DirectX;
 using namespace Windows::Foundation;
 
 // 从文件中加载顶点和像素着色器，然后实例化立方体几何图形。
-CubeBox::CubeBox(const std::shared_ptr<DX::DeviceResources>& deviceResources):
+Plane::Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
 	m_tracking(false),
-	m_deviceResources(deviceResources)	
+	m_deviceResources(deviceResources)
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
 }
 
-CubeBox::CubeBox(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform) :
+Plane::Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
@@ -37,10 +37,8 @@ CubeBox::CubeBox(const std::shared_ptr<DX::DeviceResources>& deviceResources, co
 	CreateWindowSizeDependentResources();
 }
 
-
-
 // 当窗口的大小改变时初始化视图参数。
-void CubeBox::CreateWindowSizeDependentResources()
+void Plane::CreateWindowSizeDependentResources()
 {
 	Size outputSize = m_deviceResources->GetOutputSize();
 	float aspectRatio = outputSize.Width / outputSize.Height;
@@ -52,7 +50,7 @@ void CubeBox::CreateWindowSizeDependentResources()
 	{
 		fovAngleY *= 2.0f;
 	}
-	
+
 	// 请注意，OrientationTransform3D 矩阵在此处是后乘的，
 	// 以正确确定场景的方向，使之与显示方向匹配。
 	// 对于交换链的目标位图进行的任何绘制调用
@@ -74,13 +72,11 @@ void CubeBox::CreateWindowSizeDependentResources()
 	XMStoreFloat4x4(
 		&m_constantBufferData.projection,
 		XMMatrixTranspose(perspectiveMatrix * orientationMatrix)
-	);
-
-	// 眼睛位于(0,0.7,5.5)，并沿着 Y 轴使用向上矢量查找点(0,-0.1,0)。	
+	);	
 }
 
 // 每个帧调用一次，旋转model，并计算模型和视图矩阵。
-void CubeBox::Update(DX::StepTimer const& timer)
+void Plane::Update(DX::StepTimer const& timer)
 {
 	if (!m_tracking)
 	{
@@ -119,13 +115,13 @@ void CubeBox::Update(DX::StepTimer const& timer)
 
 
 
-void CubeBox::StartTracking()
+void Plane::StartTracking()
 {
 	m_tracking = true;
 }
 
 // 进行跟踪时，可跟踪指针相对于输出屏幕宽度的位置，从而让 3D 立方体围绕其 Y 轴旋转。
-void CubeBox::TrackingUpdate(float positionX)
+void Plane::TrackingUpdate(float positionX)
 {
 	if (m_tracking)
 	{
@@ -140,13 +136,13 @@ void CubeBox::TrackingUpdate(float positionX)
 	}
 }
 
-void CubeBox::StopTracking()
+void Plane::StopTracking()
 {
 	m_tracking = false;
 }
 
 // 使用顶点和像素着色器呈现一个帧。
-void CubeBox::Render()
+void Plane::Render()
 {
 	// 加载是异步的。仅在加载几何图形后才会绘制它。
 	if (!m_loadingComplete)
@@ -189,21 +185,21 @@ void CubeBox::Render()
 	context->IASetInputLayout(m_inputLayout.Get());
 
 	// 附加我们的顶点着色器。
-	context->VSSetShader( m_vertexShader.Get(), nullptr, 0);
+	context->VSSetShader(m_vertexShader.Get(), nullptr, 0);
 
 	// 将常量缓冲区发送到图形设备。
-	context->VSSetConstantBuffers1( 0, 1, m_constantBuffer.GetAddressOf(), nullptr, nullptr);
+	context->VSSetConstantBuffers1(0, 1, m_constantBuffer.GetAddressOf(), nullptr, nullptr);
 
 	// 附加我们的像素着色器。
-	context->PSSetShader( m_pixelShader.Get(), nullptr, 0);
+	context->PSSetShader(m_pixelShader.Get(), nullptr, 0);
 	context->PSSetShaderResources(0, 1, m_textureRV.GetAddressOf());
 	context->PSSetConstantBuffers(0, 1, m_constantBuffer.GetAddressOf());
 	context->PSSetSamplers(0, 1, m_samplerLinear.GetAddressOf());
 	// 绘制对象。
-	context->DrawIndexed( m_indexCount, 0, 0);
+	context->DrawIndexed(m_indexCount, 0, 0);
 }
 
-void CubeBox::CreateDeviceDependentResources()
+void Plane::CreateDeviceDependentResources()
 {
 	// 通过异步方式加载着色器。
 	auto loadVSTask = DX::ReadDataAsync(L"VertexShader.cso");
@@ -223,8 +219,8 @@ void CubeBox::CreateDeviceDependentResources()
 		static const D3D11_INPUT_ELEMENT_DESC vertexDesc[] =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		};
 
 		DX::ThrowIfFailed(
@@ -257,7 +253,7 @@ void CubeBox::CreateDeviceDependentResources()
 				&m_constantBuffer
 			)
 		);
-		
+
 		D3D11_SAMPLER_DESC sampDesc;
 		ZeroMemory(&sampDesc, sizeof(sampDesc));
 		sampDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -282,35 +278,11 @@ void CubeBox::CreateDeviceDependentResources()
 		// 加载网格顶点。每个顶点都有一个位置,法向量，纹理坐标。
 		static const VertexPCNT cubeVertices[] =
 		{
-			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
+			{ XMFLOAT3(-0.5f, 0.0f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0, 0.0f) },
+			{ XMFLOAT3(-0.5f, 0.0f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, m_scale.z) },
+			{ XMFLOAT3(0.5f, 0.0f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(m_scale.x, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.0f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(m_scale.x, m_scale.z) },
 
-			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
-
-			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
-
-			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
-
-			{ XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT3(-0.5f, -0.5f, -0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT3(0.5f, -0.5f, -0.5f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT3(0.5f, 0.5f, -0.5f), XMFLOAT2(1.0f, 0.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT3(-0.5f, 0.5f, -0.5f), XMFLOAT2(0.0f, 0.0f) },
-
-			{ XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT3(-0.5f, -0.5f, 0.5f), XMFLOAT2(1.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT3(0.5f, -0.5f, 0.5f), XMFLOAT2(0.0f, 1.0f) },
-			{ XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT2(0.0f, 0.0f) },
-			{ XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT3(-0.5f, 0.5f, 0.5f), XMFLOAT2(1.0f, 0.0f) },
 		};
 
 		D3D11_SUBRESOURCE_DATA vertexBufferData = { 0 };
@@ -333,23 +305,8 @@ void CubeBox::CreateDeviceDependentResources()
 		// 此网格的第一个三角形。
 		static const unsigned short cubeIndices[] =
 		{
-			0,1,3,
-			3,1,2,
-
-			5,4,6,
-			6,4,7,
-
-			8,9,11,
-			11,9,10,
-
-			13,12,14,
-			14,12,15,
-
-			16,17,19,
-			19,17,18,
-
-			21,20,22,
-			22,20,23
+			0,2,1,
+			1,2,3,
 		};
 
 		m_indexCount = ARRAYSIZE(cubeIndices);
@@ -366,12 +323,12 @@ void CubeBox::CreateDeviceDependentResources()
 				&m_indexBuffer
 			)
 		);
-		
+
 		// 加载纹理
 		DX::ThrowIfFailed(
 			CreateDDSTextureFromFile(
 				m_deviceResources->GetD3DDevice(),
-				L"Assets/Wood.dds",
+				L"Assets/Grass.dds",
 				nullptr,
 				&m_textureRV
 			)
@@ -384,7 +341,7 @@ void CubeBox::CreateDeviceDependentResources()
 	});
 }
 
-void CubeBox::ReleaseDeviceDependentResources()
+void Plane::ReleaseDeviceDependentResources()
 {
 	m_loadingComplete = false;
 	m_vertexShader.Reset();
@@ -392,7 +349,7 @@ void CubeBox::ReleaseDeviceDependentResources()
 	m_pixelShader.Reset();
 	m_constantBuffer.Reset();
 	m_vertexBuffer.Reset();
-	m_indexBuffer.Reset();	
+	m_indexBuffer.Reset();
 	m_samplerLinear.Reset();
 	m_textureRV.Reset();
 }

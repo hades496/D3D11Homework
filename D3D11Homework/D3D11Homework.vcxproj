@@ -188,6 +188,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Image Include="Assets\Grass.dds" />
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
     <Image Include="Assets\snow.dds" />
     <Image Include="Assets\SplashScreen.scale-200.png" />
@@ -206,7 +207,9 @@
     <ClInclude Include="Common\LightHelper.h" />
     <ClInclude Include="Content\CubeBox.h" />
     <ClInclude Include="Content\DDSTextureLoader.h" />
+    <ClInclude Include="Content\FirstCamera.h" />
     <ClInclude Include="Content\Model.h" />
+    <ClInclude Include="Content\Plane.h" />
     <ClInclude Include="Content\SceneRenderer.h" />
     <ClInclude Include="Content\Snowman.h" />
     <ClInclude Include="Content\SphereRenderer.h" />
@@ -224,7 +227,9 @@
     <ClCompile Include="Content\DDSTextureLoader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Content\FirstCamera.cpp" />
     <ClCompile Include="Content\Model.cpp" />
+    <ClCompile Include="Content\Plane.cpp" />
     <ClCompile Include="Content\SceneRenderer.cpp" />
     <ClCompile Include="Content\Snowman.cpp" />
     <ClCompile Include="Content\SphereRenderer.cpp" />

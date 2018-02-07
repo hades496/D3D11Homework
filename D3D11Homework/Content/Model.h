@@ -18,9 +18,9 @@ namespace D3D11Homework
 		virtual void Update(DX::StepTimer const& timer);
 		virtual void Render();
 		virtual void ReleaseDeviceDependentResources();
-		std::shared_ptr<DX::DeviceResources> m_deviceResources;
-		
 		virtual void CreateWindowSizeDependentResources();
+		virtual void ChangeViewMatrix(const DirectX::XMVECTORF32 eye, const DirectX::XMVECTORF32 at, const DirectX::XMVECTORF32 up);
+		ModelViewProjectionConstantBuffer	m_constantBufferData;
 	};
 }
 

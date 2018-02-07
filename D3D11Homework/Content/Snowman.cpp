@@ -10,7 +10,7 @@ using namespace D3D11Homework;
 using namespace DirectX;
 using namespace Windows::Foundation;
 
-// 从文件中加载顶点和像素着色器，然后实例化立方体几何图形。
+
 Snowman::Snowman(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	m_deviceResources(deviceResources)
 {
@@ -31,6 +31,13 @@ void Snowman::Update(DX::StepTimer const& timer)
 {
 	m_LowerSphere->Update(timer);
 	m_UpperSphere->Update(timer);
+}
+
+void Snowman::ChangeViewMatrix(const DirectX::XMVECTORF32 eye, const DirectX::XMVECTORF32 at, const DirectX::XMVECTORF32 up)
+{	
+	
+	XMStoreFloat4x4(&m_LowerSphere->m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+	XMStoreFloat4x4(&m_UpperSphere->m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 }
 
 void Snowman::CreateWindowSizeDependentResources()

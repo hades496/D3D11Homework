@@ -2,11 +2,8 @@
 
 #include "Common\StepTimer.h"
 #include "Common\DeviceResources.h"
-#include "Content\CubeBox.h"
 #include "Content\SampleFpsTextRenderer.h"
-#include "Content\Snowman.h"
 #include "Content\SceneRenderer.h"
-#include "Common\LightHelper.h"
 
 // 在屏幕上呈现 Direct2D 和 3D 内容。
 namespace D3D11Homework

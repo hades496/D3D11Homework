@@ -37,3 +37,8 @@ void Model::CreateWindowSizeDependentResources()
 {
 
 }
+
+void Model::ChangeViewMatrix(const DirectX::XMVECTORF32 eye, const DirectX::XMVECTORF32 at, const DirectX::XMVECTORF32 up)
+{
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+}

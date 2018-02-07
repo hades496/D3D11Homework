@@ -16,15 +16,23 @@ D3D11HomeworkMain::D3D11HomeworkMain(const std::shared_ptr<DX::DeviceResources>&
 	// 注册以在设备丢失或重新创建时收到通知
 	m_deviceResources->RegisterDeviceNotify(this);
 
-	// 创建模型
-	m_fpsTextRenderer = std::unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
+	
+	m_fpsTextRenderer = unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 
-	m_sceneRenderer = std::unique_ptr<SceneRenderer>(new SceneRenderer(m_deviceResources));
+	// 创建场景管理器
+	m_sceneRenderer = unique_ptr<SceneRenderer>(new SceneRenderer(m_deviceResources));
 
-	m_sceneRenderer->Add(std::unique_ptr<Model>(new CubeBox(m_deviceResources, true, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.5f, 0.0f, 1.5f))));
-	//m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(1.5f, 1.0f, 1.5f))));
-	//m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, false, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
+	//添加地面
+	m_sceneRenderer->Add(unique_ptr<Model>(new Plane(m_deviceResources, false, XMFLOAT3(100.0f, 100.0f, 100.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
 
+	//添加一个正方体盒
+	m_sceneRenderer->Add(unique_ptr<Model>(new CubeBox(m_deviceResources, true, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(3.0f, 1.0f, 3.0f))));
+
+	//添加两个雪人
+	m_sceneRenderer->Add(unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(3.0f, 2.0f, 3.0f))));
+	m_sceneRenderer->Add(unique_ptr<Model>(new Snowman(m_deviceResources, false, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f))));
+
+	
 
 
 	// TODO: 如果需要默认的可变时间步长模式之外的其他模式，请更改计时器设置。

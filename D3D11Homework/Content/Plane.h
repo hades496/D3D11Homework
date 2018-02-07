@@ -6,14 +6,17 @@
 
 #include "Model.h"
 
+
+
 namespace D3D11Homework
 {
+	
 	// 此示例呈现器实例化一个基本渲染管道。
-	class SphereRenderer :public Model
+	class Plane :public Model
 	{
 	public:
-		SphereRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources);
-		SphereRenderer(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform);
+		Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources);
+		Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform);
 		void CreateDeviceDependentResources();
 		void CreateWindowSizeDependentResources();
 		void ReleaseDeviceDependentResources();
@@ -23,7 +26,6 @@ namespace D3D11Homework
 		void TrackingUpdate(float positionX);
 		void StopTracking();
 		bool IsTracking() { return m_tracking; }
-
 	private:
 
 

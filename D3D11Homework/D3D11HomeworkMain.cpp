@@ -21,7 +21,7 @@ D3D11HomeworkMain::D3D11HomeworkMain(const std::shared_ptr<DX::DeviceResources>&
 
 	m_sceneRenderer = std::unique_ptr<SceneRenderer>(new SceneRenderer(m_deviceResources));
 
-	m_sceneRenderer->Add(std::unique_ptr<Model>(new CubeBox(m_deviceResources, true, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
+	m_sceneRenderer->Add(std::unique_ptr<Model>(new CubeBox(m_deviceResources, true, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(1.5f, 0.0f, 1.5f))));
 	//m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(1.5f, 1.0f, 1.5f))));
 	//m_sceneRenderer->Add(std::unique_ptr<Model>(new Snowman(m_deviceResources, false, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
 

@@ -110,6 +110,13 @@
     <Image Include="Assets\snow.dds">
       <Filter>资产</Filter>
     </Image>
+    <Image Include="Content\snow.dds">
+      <Filter>内容</Filter>
+    </Image>
+    <Image Include="snow.dds" />
+    <Image Include="Assets\Wood.dds">
+      <Filter>资产</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />

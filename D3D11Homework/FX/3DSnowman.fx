@@ -5,6 +5,31 @@
 //--------------------------------------------------------------------------------------
 
 //--------------------------------------------------------------------------------------
+struct VS_INPUT
+{
+	float4 Pos : POSITION;
+	float3 Norm : NORMAL;
+	float2 Tex : TEXCOORD0;
+};
+
+struct PS_INPUT
+{
+	float4 Pos : SV_POSITION;
+	float3 Norm : Normal;
+	float2 Tex : TEXCOORD1;
+};
+
+float3 Normalization(float3 norm)
+{
+	float3 out_norm = norm;
+	float d = length(norm);
+	out_norm /= d;
+	return out_norm;
+}
+
+
+
+//--------------------------------------------------------------------------------------
 // Constant Buffer Variables
 //--------------------------------------------------------------------------------------
 Texture2D txDiffuse : register(t0);
@@ -20,24 +45,7 @@ cbuffer ConstantBuffer: register(b0)
 	matrix projection;
 	float4 vLightDir;
 	float4 vLightColor;
-	float4 vOutputColor;
 }
-
-//--------------------------------------------------------------------------------------
-struct VS_INPUT
-{
-	float4 Pos : POSITION;
-	float3 Norm : NORMAL;
-	float2 Tex : TEXCOORD0;
-};
-
-struct PS_INPUT
-{
-	float4 Pos : SV_POSITION;
-	float3 Norm : TEXCOORD0;
-	float2 Tex : TEXCOORD1;
-};
-
 
 //--------------------------------------------------------------------------------------
 // Vertex Shader
@@ -48,12 +56,11 @@ PS_INPUT VS(VS_INPUT input)
 	output.Pos = mul(input.Pos, model);
 	output.Pos = mul(output.Pos, view);
 	output.Pos = mul(output.Pos, projection);
-	output.Norm = mul(float4(input.Norm, 1), model).xyz;
+	output.Norm = mul(float4(input.Norm, 0), model).xyz;
+	//output.Norm = input.Norm;
 	output.Tex = input.Tex;
-
 	return output;
 }
-
 
 //--------------------------------------------------------------------------------------
 // Pixel Shader
@@ -61,10 +68,11 @@ PS_INPUT VS(VS_INPUT input)
 float4 PS(PS_INPUT input) : SV_Target
 {
 	float4 finalColor = 0;
-	float d = length(vLightDir);
-	finalColor += saturate(dot((float3)vLightDir / d,input.Norm) * vLightColor);
+	float4 nor_Light = float4(Normalization(vLightDir.xyz),1);
+	float4 nor_Norm = float4(Normalization(input.Norm),1);
+	finalColor += saturate(dot(nor_Light, nor_Norm) * vLightColor);
 	finalColor.a = 1;
 
-	//return txDiffuse.Sample(samLinear, input.Tex) * finalColor;
-	return finalColor;
+	return txDiffuse.Sample(samLinear, input.Tex) * finalColor;
+	//return finalColor;
 }

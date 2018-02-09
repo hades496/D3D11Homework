@@ -24,6 +24,9 @@ namespace DX
 		void Trim();
 		void Present();
 
+		// 对窗口的缓存引用。
+		Platform::Agile<Windows::UI::Core::CoreWindow> m_window;
+
 		// 呈现器目标的大小，以像素为单位。
 		Windows::Foundation::Size	GetOutputSize() const					{ return m_outputSize; }
 
@@ -49,6 +52,8 @@ namespace DX
 		IDWriteFactory3*			GetDWriteFactory() const				{ return m_dwriteFactory.Get(); }
 		IWICImagingFactory2*		GetWicImagingFactory() const			{ return m_wicFactory.Get(); }
 		D2D1::Matrix3x2F			GetOrientationTransform2D() const		{ return m_orientationTransform2D; }
+
+		Platform::Agile<Windows::UI::Core::CoreWindow> GetWinodw() const	{ return m_window; }
 
 	private:
 		void CreateDeviceIndependentResources();
@@ -77,8 +82,6 @@ namespace DX
 		Microsoft::WRL::ComPtr<IDWriteFactory3>		m_dwriteFactory;
 		Microsoft::WRL::ComPtr<IWICImagingFactory2>	m_wicFactory;
 
-		// 对窗口的缓存引用。
-		Platform::Agile<Windows::UI::Core::CoreWindow> m_window;
 
 		// 缓存的设备属性。
 		D3D_FEATURE_LEVEL								m_d3dFeatureLevel;

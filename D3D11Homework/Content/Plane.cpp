@@ -23,7 +23,7 @@ Plane::Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources) :
 	CreateWindowSizeDependentResources();
 }
 
-Plane::Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform) :
+Plane::Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, XMFLOAT3 scale, XMFLOAT3 transform,UINT dir) :
 	m_loadingComplete(false),
 	m_degreesPerSecond(45),
 	m_indexCount(0),
@@ -31,7 +31,8 @@ Plane::Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources, const 
 	m_deviceResources(deviceResources),
 	m_rotatable(rotatable),
 	m_scale(scale),
-	m_transform(transform)
+	m_transform(transform),
+	m_direct(dir)
 {
 	CreateDeviceDependentResources();
 	CreateWindowSizeDependentResources();
@@ -83,19 +84,10 @@ void Plane::Update(DX::StepTimer const& timer)
 
 		//保存累计变换
 		XMMATRIX cumulativeMatrix = XMMatrixIdentity();
-
 		// 初始化变换矩阵
 		cumulativeMatrix *= XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
 		cumulativeMatrix *= XMMatrixTranslation(m_transform.x, m_transform.y, m_transform.z);
-		// 具体的模型变换
-		if (m_rotatable)
-		{
-			float radiansPerSecond = XMConvertToRadians(m_degreesPerSecond);
-			double totalRotation = timer.GetTotalSeconds() * radiansPerSecond;
-			float radians = static_cast<float>(fmod(totalRotation, XM_2PI));
-			cumulativeMatrix *= XMMatrixRotationY(radians);
-		}
-
+		
 		// 设置灯光参数
 		XMFLOAT4 vLightDirs = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		XMFLOAT4 vLightColors = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -109,6 +101,58 @@ void Plane::Update(DX::StepTimer const& timer)
 		);
 		m_constantBufferData.vLightColor = vLightColors;
 		m_constantBufferData.vLightDir = vLightDirs;
+
+	}
+}
+
+// 每个帧调用一次，旋转model，并计算模型和视图矩阵。
+void Plane::Update(DX::StepTimer const& timer, XMFLOAT3 cameraPos)
+{
+	if (!m_tracking)
+	{
+
+		//保存累计变换
+		XMMATRIX cumulativeMatrix = XMMatrixIdentity();
+		if (m_direct == 1) //旋转到东侧
+		{
+			cumulativeMatrix *= XMMatrixRotationY(-XM_PIDIV2);
+			cumulativeMatrix *= XMMatrixRotationZ(XM_PIDIV2); 
+		}
+		if (m_direct == 2)//旋转到南侧
+		{
+			cumulativeMatrix *= XMMatrixRotationY(XM_PI);
+			cumulativeMatrix *= XMMatrixRotationX(-XM_PIDIV2); 
+		}
+		if (m_direct == 3)//旋转到西侧
+		{
+			cumulativeMatrix *= XMMatrixRotationY(XM_PIDIV2);
+			cumulativeMatrix *= XMMatrixRotationZ(-XM_PIDIV2); 
+		}
+		if (m_direct == 4)//旋转到北侧
+		{
+			cumulativeMatrix *= XMMatrixRotationX(XM_PIDIV2); 
+		}
+		if (m_direct == 5) //旋转到顶侧
+		{
+			cumulativeMatrix *= XMMatrixRotationY(-XM_PI);
+			cumulativeMatrix *= XMMatrixRotationX(XM_PI);
+		}
+
+		// 初始化变换矩阵
+		cumulativeMatrix *= XMMatrixScaling(m_scale.x, m_scale.y, m_scale.z);
+		cumulativeMatrix *= XMMatrixTranslation(m_transform.x, m_transform.y, m_transform.z);
+		if (m_direct > 0)
+		{
+			cumulativeMatrix *= XMMatrixTranslation(cameraPos.x, cameraPos.y, cameraPos.z);
+		}
+			
+		// 准备将更新的模型矩阵传递到着色器
+		XMStoreFloat4x4(
+			&m_constantBufferData.model,
+			XMMatrixTranspose(
+				cumulativeMatrix
+			)
+		);
 
 	}
 }
@@ -202,8 +246,16 @@ void Plane::Render()
 void Plane::CreateDeviceDependentResources()
 {
 	// 通过异步方式加载着色器。
-	auto loadVSTask = DX::ReadDataAsync(L"VertexShader.cso");
-	auto loadPSTask = DX::ReadDataAsync(L"PixelShader.cso");
+	auto loadVSTask = DX::ReadDataAsync(
+		m_direct == 0 ?
+		L"VertexShader.cso" :
+		L"SkyBoxVertexShader.cso"
+	);
+	auto loadPSTask = DX::ReadDataAsync(
+		m_direct == 0?
+		L"PixelShader.cso":
+		L"SkyBoxPixelShader.cso"
+	);
 
 	// 加载顶点着色器文件之后，创建着色器和输入布局。
 	auto createVSTask = loadVSTask.then([this](const std::vector<byte>& fileData) {
@@ -279,9 +331,9 @@ void Plane::CreateDeviceDependentResources()
 		static const VertexPCNT cubeVertices[] =
 		{
 			{ XMFLOAT3(-0.5f, 0.0f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0, 0.0f) },
-			{ XMFLOAT3(-0.5f, 0.0f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, m_scale.z) },
-			{ XMFLOAT3(0.5f, 0.0f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(m_scale.x, 0.0f) },
-			{ XMFLOAT3(0.5f, 0.0f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(m_scale.x, m_scale.z) },
+			{ XMFLOAT3(-0.5f, 0.0f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(0.0f, 1.0f) },
+			{ XMFLOAT3(0.5f, 0.0f, -0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 0.0f) },
+			{ XMFLOAT3(0.5f, 0.0f, 0.5f), XMFLOAT3(0.0f, 1.0f, 0.0f), XMFLOAT2(1.0f, 1.0f) },
 
 		};
 
@@ -305,8 +357,8 @@ void Plane::CreateDeviceDependentResources()
 		// 此网格的第一个三角形。
 		static const unsigned short cubeIndices[] =
 		{
-			0,2,1,
-			1,2,3,
+			0,2,3,
+			1,0,3,
 		};
 
 		m_indexCount = ARRAYSIZE(cubeIndices);
@@ -325,10 +377,17 @@ void Plane::CreateDeviceDependentResources()
 		);
 
 		// 加载纹理
+		auto ddsFile = L"Assets/Grass.dds";
+		if (m_direct == 1) ddsFile = L"Assets/SkyBox_east.dds";
+		if (m_direct == 2) ddsFile = L"Assets/SkyBox_south.dds";
+		if (m_direct == 3) ddsFile = L"Assets/SkyBox_west.dds";
+		if (m_direct == 4) ddsFile = L"Assets/SkyBox_north.dds";
+		if (m_direct == 5) ddsFile = L"Assets/SkyBox_up.dds";
+
 		DX::ThrowIfFailed(
 			CreateDDSTextureFromFile(
 				m_deviceResources->GetD3DDevice(),
-				L"Assets/Grass.dds",
+				ddsFile,
 				nullptr,
 				&m_textureRV
 			)

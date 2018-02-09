@@ -16,10 +16,11 @@ namespace D3D11Homework
 	{
 	public:
 		Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources);
-		Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform);
+		Plane(const std::shared_ptr<DX::DeviceResources>& deviceResources, const bool rotatable, DirectX::XMFLOAT3 scale, DirectX::XMFLOAT3 transform, UINT dir = 0);
 		void CreateDeviceDependentResources();
 		void CreateWindowSizeDependentResources();
 		void ReleaseDeviceDependentResources();
+		void Update(DX::StepTimer const& timer, DirectX::XMFLOAT3 cameraPos = DirectX::XMFLOAT3(0, 0, 0));
 		void Update(DX::StepTimer const& timer);
 		void Render();
 		void StartTracking();
@@ -53,11 +54,12 @@ namespace D3D11Homework
 
 		// 用于模型初始化的变量。
 		DirectX::XMFLOAT3 m_scale;
+		DirectX::XMFLOAT3 m_textureScale;
 		DirectX::XMFLOAT3 m_transform;
 
 		// 附加参数
 		bool	m_rotatable;	//是否旋转
-
+		UINT	m_direct; //初始plane的朝向 0:DOWN, 1:EAST, 2:SOUTH, 3:WEST, 4:NORTH, 5:UP
 
 	};
 }

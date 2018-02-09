@@ -133,7 +133,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Link>
-      <AdditionalDependencies>winmm.lib;comctl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;d3dcompiler.lib;d2d1.lib; d3d11.lib; dxgi.lib; windowscodecs.lib; dwrite.lib; %(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;comctl32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store; $(VCInstallDir)\lib</AdditionalLibraryDirectories>
     </Link>
     <ClCompile>
@@ -142,7 +142,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(IntermediateOutputPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -190,6 +190,12 @@
   <ItemGroup>
     <Image Include="Assets\Grass.dds" />
     <Image Include="Assets\LockScreenLogo.scale-200.png" />
+    <Image Include="Assets\SkyBox_down.dds" />
+    <Image Include="Assets\SkyBox_east.dds" />
+    <Image Include="Assets\SkyBox_north.dds" />
+    <Image Include="Assets\SkyBox_south.dds" />
+    <Image Include="Assets\SkyBox_up.dds" />
+    <Image Include="Assets\SkyBox_west.dds" />
     <Image Include="Assets\snow.dds" />
     <Image Include="Assets\SplashScreen.scale-200.png" />
     <Image Include="Assets\Square150x150Logo.scale-200.png" />
@@ -207,10 +213,10 @@
     <ClInclude Include="Common\LightHelper.h" />
     <ClInclude Include="Content\CubeBox.h" />
     <ClInclude Include="Content\DDSTextureLoader.h" />
-    <ClInclude Include="Content\FirstCamera.h" />
     <ClInclude Include="Content\Model.h" />
     <ClInclude Include="Content\Plane.h" />
     <ClInclude Include="Content\SceneRenderer.h" />
+    <ClInclude Include="Content\SkyBox.h" />
     <ClInclude Include="Content\Snowman.h" />
     <ClInclude Include="Content\SphereRenderer.h" />
     <ClInclude Include="D3D11HomeworkMain.h" />
@@ -218,6 +224,7 @@
     <ClInclude Include="Common\StepTimer.h" />
     <ClInclude Include="Content\SampleFpsTextRenderer.h" />
     <ClInclude Include="Content\ShaderStructures.h" />
+    <ClInclude Include="MoveLookController.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -227,14 +234,15 @@
     <ClCompile Include="Content\DDSTextureLoader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Use</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Content\FirstCamera.cpp" />
     <ClCompile Include="Content\Model.cpp" />
     <ClCompile Include="Content\Plane.cpp" />
     <ClCompile Include="Content\SceneRenderer.cpp" />
+    <ClCompile Include="Content\SkyBox.cpp" />
     <ClCompile Include="Content\Snowman.cpp" />
     <ClCompile Include="Content\SphereRenderer.cpp" />
     <ClCompile Include="D3D11HomeworkMain.cpp" />
     <ClCompile Include="Content\SampleFpsTextRenderer.cpp" />
+    <ClCompile Include="MoveLookController.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -266,6 +274,14 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS</EntryPointName>
+    </FxCompile>
+    <FxCompile Include="FX\SkyBoxPixelShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="FX\SkyBoxVertexShader.hlsl">
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">VS</EntryPointName>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
     </FxCompile>
     <FxCompile Include="FX\VertexShader.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>

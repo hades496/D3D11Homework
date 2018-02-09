@@ -18,6 +18,13 @@ void Model::Update(DX::StepTimer const& timer)
 
 }
 
+void Model::Update(DX::StepTimer const& timer, DirectX::XMFLOAT3)
+{
+
+}
+
+
+
 void Model::CreateDeviceDependentResources()
 {
 }
@@ -38,7 +45,11 @@ void Model::CreateWindowSizeDependentResources()
 
 }
 
-void Model::ChangeViewMatrix(const DirectX::XMVECTORF32 eye, const DirectX::XMVECTORF32 at, const DirectX::XMVECTORF32 up)
+void Model::ChangeViewMatrix(const DirectX::XMMATRIX viewMatrix)
 {
-	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
+	XMStoreFloat4x4(&m_constantBufferData.view, XMMatrixTranspose(viewMatrix));
+}
+void Model::ChangeModelMatrix(const DirectX::XMMATRIX viewMatrix)
+{
+	XMStoreFloat4x4(&m_constantBufferData.model, XMMatrixTranspose(viewMatrix));
 }

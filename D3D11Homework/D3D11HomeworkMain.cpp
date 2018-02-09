@@ -15,24 +15,44 @@ D3D11HomeworkMain::D3D11HomeworkMain(const std::shared_ptr<DX::DeviceResources>&
 {
 	// 注册以在设备丢失或重新创建时收到通知
 	m_deviceResources->RegisterDeviceNotify(this);
-
+	
 	
 	m_fpsTextRenderer = unique_ptr<SampleFpsTextRenderer>(new SampleFpsTextRenderer(m_deviceResources));
 
 	// 创建场景管理器
 	m_sceneRenderer = unique_ptr<SceneRenderer>(new SceneRenderer(m_deviceResources));
 
-	//添加地面
-	m_sceneRenderer->Add(unique_ptr<Model>(new Plane(m_deviceResources, false, XMFLOAT3(100.0f, 100.0f, 100.0f), XMFLOAT3(0.0f, 0.0f, 0.0f))));
-
 	//添加一个正方体盒
-	m_sceneRenderer->Add(unique_ptr<Model>(new CubeBox(m_deviceResources, true, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(3.0f, 1.0f, 3.0f))));
+	m_sceneRenderer->Add("box", unique_ptr<Model>(new CubeBox(m_deviceResources, true, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(3.0f, 0.5f, 3.0f))));
+
+	//添加地面
+	m_sceneRenderer->Add(
+		"plane",
+		unique_ptr<Model>(
+			new Plane(
+				m_deviceResources, 
+				false, 
+				XMFLOAT3(1000.0f, 1000.0f, 1000.0f), 
+				XMFLOAT3(0.0f, 0.0f, 0.0f),
+				0
+			)
+		)
+	);
+	// 创建天空盒
+	m_sceneRenderer->Add(
+		"SkyBox",
+		unique_ptr<Model>(
+			new SkyBox(
+				m_deviceResources,
+				100.0f
+			)
+		)
+	);
 
 	//添加两个雪人
-	m_sceneRenderer->Add(unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(3.0f, 2.0f, 3.0f))));
-	m_sceneRenderer->Add(unique_ptr<Model>(new Snowman(m_deviceResources, false, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f))));
+	m_sceneRenderer->Add("snowman", unique_ptr<Model>(new Snowman(m_deviceResources, true, XMFLOAT3(0.5f, 0.5f, 0.5f), XMFLOAT3(3.0f, 1.5f, 3.0f))));
+	m_sceneRenderer->Add("snowman", unique_ptr<Model>(new Snowman(m_deviceResources, false, XMFLOAT3(1.0f, 1.0f, 1.0f), XMFLOAT3(0.0f, 1.0f, 0.0f))));
 
-	
 
 
 	// TODO: 如果需要默认的可变时间步长模式之外的其他模式，请更改计时器设置。
@@ -63,10 +83,7 @@ void D3D11HomeworkMain::Start()
 // 每帧更新一次应用程序状态。
 void D3D11HomeworkMain::Update() 
 {
-	//mfxDirLight->SetRawValue(&mDirLight, 0, sizeof(mDirLight));
-	//mfxPointLight->SetRawValue(&mPointLight, 0, sizeof(mPointLight));
-	//mfxSpotLight->SetRawValue(&mSpotLight, 0, sizeof(mSpotLight));
-	//mfxEyePosW->SetRawValue(&mEyePosW, 0, sizeof(mEyePosW));
+
 
 	// 更新场景对象。
 	m_timer.Tick([&]()
@@ -104,9 +121,9 @@ bool D3D11HomeworkMain::Render()
 	context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	
 	// 呈现场景对象。
-	//m_fpsTextRenderer->Render();
+	
 	m_sceneRenderer->Render();
-
+	m_fpsTextRenderer->Render();
 	
 	return true;
 }

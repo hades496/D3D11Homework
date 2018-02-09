@@ -16,10 +16,13 @@ namespace D3D11Homework
 		virtual ~Model();
 		virtual void CreateDeviceDependentResources();
 		virtual void Update(DX::StepTimer const& timer);
+		virtual void Update(DX::StepTimer const& timer, DirectX::XMFLOAT3);
 		virtual void Render();
 		virtual void ReleaseDeviceDependentResources();
 		virtual void CreateWindowSizeDependentResources();
-		virtual void ChangeViewMatrix(const DirectX::XMVECTORF32 eye, const DirectX::XMVECTORF32 at, const DirectX::XMVECTORF32 up);
+		
+		virtual void ChangeViewMatrix(const DirectX::XMMATRIX viewMatrix);
+		virtual void ChangeModelMatrix(const DirectX::XMMATRIX viewMatrix);
 		ModelViewProjectionConstantBuffer	m_constantBufferData;
 	};
 }

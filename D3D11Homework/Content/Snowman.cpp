@@ -40,6 +40,12 @@ void Snowman::ChangeViewMatrix(const DirectX::XMVECTORF32 eye, const DirectX::XM
 	XMStoreFloat4x4(&m_UpperSphere->m_constantBufferData.view, XMMatrixTranspose(XMMatrixLookAtRH(eye, at, up)));
 }
 
+void Snowman::ChangeViewMatrix(const DirectX::XMMATRIX viewMatrix)
+{
+	XMStoreFloat4x4(&m_LowerSphere->m_constantBufferData.view, XMMatrixTranspose(viewMatrix));
+	XMStoreFloat4x4(&m_UpperSphere->m_constantBufferData.view, XMMatrixTranspose(viewMatrix));
+}
+
 void Snowman::CreateWindowSizeDependentResources()
 {
 	m_LowerSphere->CreateWindowSizeDependentResources();

@@ -79,7 +79,8 @@
     <ClCompile Include="Content\Plane.cpp">
       <Filter>内容</Filter>
     </ClCompile>
-    <ClCompile Include="Content\FirstCamera.cpp">
+    <ClCompile Include="MoveLookController.cpp" />
+    <ClCompile Include="Content\SkyBox.cpp">
       <Filter>内容</Filter>
     </ClCompile>
   </ItemGroup>
@@ -111,7 +112,8 @@
     <ClInclude Include="Content\Plane.h">
       <Filter>内容</Filter>
     </ClInclude>
-    <ClInclude Include="Content\FirstCamera.h">
+    <ClInclude Include="MoveLookController.h" />
+    <ClInclude Include="Content\SkyBox.h">
       <Filter>内容</Filter>
     </ClInclude>
   </ItemGroup>
@@ -132,6 +134,24 @@
     <Image Include="Assets\Grass.dds">
       <Filter>资产</Filter>
     </Image>
+    <Image Include="Assets\SkyBox_down.dds">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\SkyBox_east.dds">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\SkyBox_north.dds">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\SkyBox_south.dds">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\SkyBox_up.dds">
+      <Filter>资产</Filter>
+    </Image>
+    <Image Include="Assets\SkyBox_west.dds">
+      <Filter>资产</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest" />
@@ -147,6 +167,12 @@
       <Filter>FX</Filter>
     </FxCompile>
     <FxCompile Include="FX\3DSnowman.fx">
+      <Filter>FX</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\SkyBoxPixelShader.hlsl">
+      <Filter>FX</Filter>
+    </FxCompile>
+    <FxCompile Include="FX\SkyBoxVertexShader.hlsl">
       <Filter>FX</Filter>
     </FxCompile>
   </ItemGroup>

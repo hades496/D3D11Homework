@@ -101,7 +101,7 @@ void CubeBox::Update(DX::StepTimer const& timer)
 		}
 
 		// 设置灯光参数
-		XMFLOAT4 vLightDirs = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		XMFLOAT4 vLightDirs = XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 		XMFLOAT4 vLightColors = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		// 准备将更新的模型矩阵传递到着色器
